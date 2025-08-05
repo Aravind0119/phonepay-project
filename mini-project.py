@@ -1,3 +1,9 @@
+import json
+import os
+import smtplib
+from email.message import EmailMessage
+
+
 
 import random
 class phonepay:
@@ -19,6 +25,7 @@ class phonepay:
     @classmethod
     def sel(self):
         while True:
+            self.email=input("enter email :")
             self.phone=int(input(f"login with mobile number\n>>"))
             if len(str(self.phone))==10 and self.phone>0:
                 phonepay.otp()                
@@ -26,13 +33,37 @@ class phonepay:
             else:
                 print(f"please enter 10 digit phone number")
         self.name=input("enter full name (or) press enter to skip:")
-        self.email=input("enter email (or) press enter to skip:")
+       
         self.ybl=str(self.phone)+"@ybl"
+
+    @classmethod
+    def otp_sender(self,r_no):
+        
+        sender_email = "vas958141@gmail.com"
+        sender_password = "ipwdohejahvthalh"  
+        email = self.email 
+
+        msg = EmailMessage()
+        msg['From'] = sender_email
+        msg['To'] = email
+        msg['Subject'] = "msg for OTP"
+
+        msg.set_content(f"OTP IS {r_no}")
+
+        try:
+            with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                server.starttls()
+                server.login(sender_email, sender_password)
+                server.send_message(msg)    
+            print("Message sent successfully!")
+        except Exception as e:
+            print("Error:", e)
+
     @classmethod
     def otp(self):
         for r_no in range(3):
             r_no=random.randint(1000,9999)
-            print(r_no)
+            phonepay.otp_sender(r_no)
             b_otp=int(input("enter opt:>"))
             if r_no==b_otp:
                 break
@@ -147,6 +178,27 @@ class phonepay:
                     phonepay.pin()
                 else:print("this number is not linked in bank")
 
+    @classmethod
+    def save_data(cls):
+        with open("bank_data.json","w") as f:
+            json.dump(cls.amount,f)
+        with open("bank_pin.json","w") as f:
+            json.dump(cls.b_name,f)
+        with open("history.json","w") as f:
+            json.dump(cls.history,f)
+
+    @classmethod
+    def load_data(cls):
+        if os.path.exists("bank_data.json"):
+            with open("bank_data.json","r") as f:
+                cls.amount =json.load(f)
+        if os.path.exists("bank_pin.json"):
+            with open("bank_pin.json","r") as f:
+                cls.b_name =json.load(f)
+        if os.path.exists("history.json"):
+            with open("history.json","r") as f:
+                cls.history =json.load(f)
+
 print(f"{"=-="*30}\nphonepay login page\n{"=-="*30}")
 phonepay.sel() 
 while True  :
@@ -166,6 +218,7 @@ while True  :
                     phonepay.add_bank2()
             if e_amount>0:               
                 phonepay.pay(e_amount)
+                phonepay.save_data()
     elif a=="2": 
         r_no=int(input("enter phone no:"))
         if len(str(r_no))==10:
@@ -314,7 +367,3 @@ while True  :
         break
     else:
         continue
-    
-
-            
-
